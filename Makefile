@@ -16,6 +16,7 @@ rundocker:
 	-v /tmp:/tmp \
 	-v `cat datadir`:/etc/salt \
 	-h `cat hostname` \
+	-d \
 	-v /var/run/docker.sock:/run/docker.sock \
 	-v $(shell which docker):/bin/docker \
 	-t thalhalla/docker-salt-minion
