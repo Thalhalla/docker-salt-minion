@@ -1,3 +1,5 @@
 hostname
 datadir
 cid
+saltmaster
+saltmasterport
