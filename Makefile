@@ -12,7 +12,7 @@ run: master
 
 masterless: hostname builddocker runmasterless beep
 
-master: hostname saltmaster builddocker runmaster beep
+master: hostname saltmaster saltmasterport builddocker runmaster beep
 
 persist: hostname saltmaster datadir builddocker persistdocker beep
 
@@ -22,6 +22,7 @@ runmaster:
 	-v /tmp:/tmp \
 	-h `cat hostname` \
 	-e "SALT_MASTER=`cat saltmaster`" \
+	-e "SALT_MASTER_PORT=`cat saltmasterport`" \
 	-d \
 	-v /var/run/docker.sock:/run/docker.sock \
 	-v $(shell which docker):/bin/docker \
@@ -84,4 +85,9 @@ datadir:
 saltmaster:
 	@while [ -z "$$saltmaster" ]; do \
 		read -r -p "Enter the saltmaster you wish to associate with this salt container [saltmaster]: " saltmaster; echo "$$saltmaster">>saltmaster; cat saltmaster; \
+	done ;
+
+saltmasterport:
+	@while [ -z "$$saltmasterport" ]; do \
+		read -r -p "Enter the saltmasterport you wish to associate with this salt container [saltmasterport]: " saltmasterport; echo "$$saltmasterport">>saltmasterport; cat saltmasterport; \
 	done ;
