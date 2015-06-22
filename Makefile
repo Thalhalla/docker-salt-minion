@@ -8,9 +8,37 @@ help:
 
 build: builddocker beep
 
-run: hostname datadir builddocker rundocker beep
+run: master
 
-rundocker:
+masterless: hostname builddocker runmasterless beep
+
+master: hostname saltmaster builddocker runmaster beep
+
+persist: hostname saltmaster datadir builddocker persistdocker beep
+
+runmaster:
+	@docker run --name=docker-salt-minion \
+	--cidfile="cid" \
+	-v /tmp:/tmp \
+	-h `cat hostname` \
+	-e "SALT_MASTER=`cat saltmaster`" \
+	-d \
+	-v /var/run/docker.sock:/run/docker.sock \
+	-v $(shell which docker):/bin/docker \
+	-t thalhalla/docker-salt-minion
+
+runmasterless:
+	@docker run --name=docker-salt-minion \
+	--cidfile="cid" \
+	-v /tmp:/tmp \
+	-h `cat hostname` \
+	-d \
+	-v `pwd`/states:/srv/salt \
+	-v /var/run/docker.sock:/run/docker.sock \
+	-v $(shell which docker):/bin/docker \
+	-t thalhalla/docker-salt-minion
+
+persistdocker:
 	@docker run --name=docker-salt-minion \
 	--cidfile="cid" \
 	-v /tmp:/tmp \
@@ -40,6 +68,9 @@ rm: kill rm-image
 enter:
 	docker exec -i -t `cat cid` /bin/bash
 
+logs:
+	docker logs -f `cat cid`
+
 hostname:
 	@while [ -z "$$HOSTNAME" ]; do \
 		read -r -p "Enter the hostname you wish to associate with this salt container [hostNAME]: " HOSTNAME; echo "$$HOSTNAME">>hostname; cat hostname; \
@@ -48,4 +79,9 @@ hostname:
 datadir:
 	@while [ -z "$$datadir" ]; do \
 		read -r -p "Enter the datadir you wish to associate with this salt container [datadir]: " datadir; echo "$$datadir">>datadir; cat datadir; \
+	done ;
+
+saltmaster:
+	@while [ -z "$$saltmaster" ]; do \
+		read -r -p "Enter the saltmaster you wish to associate with this salt container [saltmaster]: " saltmaster; echo "$$saltmaster">>saltmaster; cat saltmaster; \
 	done ;
